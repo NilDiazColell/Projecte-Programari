@@ -1,0 +1,19 @@
+user_id,name,serial_number,constants,sampling_frequency
+,Heart Monitor,HM001,Heart Rate,30
+,Blood Pressure Monitor,BP002,Blood Pressure,60
+,Heart Monitor,HM001,"['50', '34', '56']",50
+,Blood Pressure monitor,BP003,"['Heart Rate', ' Blood Pressure']","45,67"
+3,Blood pressure monitor,h34843,['Blood Pressure'],56
+4,Heart rate monitor,4324j,['Heart rate'],40
+7,Cora,890,['80'],7
+6,Heart Perfection,780,['90'],20
+5,Heart perfection,678,"['Blood Pressure', 'Heart Rate']",10
+7,HEart,2,"['Blood Pressure', 'Heart Rate']",10
+8,hearttt,67,"['heart rate', 'blood pressure']",10
+3,hacoo,5,"['heart', 'blood']",10
+9,HAcoo,56,"['Blood Pressure', 'Heart Rate']",10
+10,tuti,3,['colesterol'],10
+10,hacto,90,"['blood pressure', 'heart rate']",10
+3,tipo,fd,['heart rate'],2
+11,ipad,56,"['Blood Preasure', 'Heart Rate']",12
+12,Temu,12,"['Blood Pressure', 'Heart Rate']",12
