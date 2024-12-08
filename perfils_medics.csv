@@ -1,0 +1,9 @@
+user_id,birth_date,gender,blood_group,allergies,address,phone,medical_comment,medications
+1,1980-01-01,Female,A+,Peanuts,123 Main St,555-1234,No major issues,Vitamin D
+2,1990-02-02,Male,O-,None,456 Elm St,555-5678,Minor allergies,None
+4,2004-01-20,Male,A+,False,c/Pablo Picasso,630203222,Major allergies,[]
+5,2004-04-05,Male,a+,False,c/Mallorca,394049494,Em fa mal la panxa,[]
+6,2004-05-09,MAle,o-,True,c/Vilafranca,56794855,Pacient careix de respiració,"[{'name': 'Ibuprofeno', 'duration': '5 mesos'}]"
+10,2000-03-03,female,o-,True,fdsfksdf,45435345,sdfsdf,[]
+11,2024-01-09,Female,A+,False,c/ñicasso,243423423,em fa mal la panxa,[]
+12,2004-03-05,Male,a+,False,c/vilapocha,5336346,em fa mal el cor,[]

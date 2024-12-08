@@ -1,0 +1,9 @@
+notification_id,user_id,message,timestamp
+1,1,Appointment reminder,2024-12-05T10:00:00Z
+2,2,Lab results available,2024-12-05T11:00:00Z
+3,3,Appointment available,2024-12-07T17:11:37.964417
+4,5,Appointment reminder,2024-12-07T17:36:55.780198
+5,6,Cita cancelada,2024-12-07T17:49:51.161053
+6,10,cita rebuda,2024-12-07T19:39:56.653689
+7,11,Cita rebuda,2024-12-07T20:10:35.373294
+8,12,Cita confirmada,2024-12-08T09:36:03.936167

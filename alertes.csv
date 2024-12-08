@@ -1,0 +1,3 @@
+user_id,constant,value,risk_level,contact_number,additional_info
+11,Heart Rate,400.0,Alt,8987879,"{'ambulance_required': True, 'clinical_history_code': '34234'}"
+12,Blood Pressure,50.0,Mitjà,44324234,"{'access_key': 'TEMP_KEY_24H', 'message': 'La pressió arteraial és molt baixa'}"

@@ -1,0 +1,9 @@
+appointment_id,user_id,doctor,specialty,date,time,medical_comment
+1,1,Dr. Smith,Cardiology,2024-12-10,10:30,Routine check-up
+2,2,Dr. Jones,Dermatology,2024-12-12,11:00,Skin rash
+3,3,Dr.Smith,Cardiology,2024-11-10,10:30,Routine check-up
+4,4,Dr.Jones,Dermatology,2023-06-08,11:00,Skin rash
+5,5,Dr.Martin,Pediatria,2030-04-04,10:30,Em fa mal la panxa
+6,6,Dr.Martin,Cardiology,2020-03-04,14:25,Pacient li costa respirar
+7,11,dr.martin,pediatra,2024-01-09,10:30,em fa mal la panxa
+8,12,Dr.Martin,Cardiologia,2024-01-01,10:30,Em fa mal el cor
