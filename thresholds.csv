@@ -1,0 +1,6 @@
+constant,min_level,max_level,units
+Blood Pressure,90.0,120.0,mmHg
+Heart Rate,60.0,100.0,bpm
+Cholesterol,150.0,200.0,mg/dL
+Temperature,36.1,37.2,°C
+Happiness,10,50,hp

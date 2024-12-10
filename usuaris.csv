@@ -1,13 +1,14 @@
-user_id,name,email,registration_date
-1,Alice,alice@example.com,2024-12-01
-2,Bob,bob@example.com,2024-12-02
-3,Namanmahi Kumar,naman@gmail.com,07-Dec-2024 
-4,Alvaro Bello,abellomarabe@gmail.com,07-Dec-2024 
-5,Adrian,afa08@gmail.com,07-Dec-2024 
-6,Marcel Izquierdo,marciel@gmail.com,07-Dec-2024 
-7,Pol,polro@gmail.com,07-Dec-2024 
-8,ncik,nick@gmail.com,07-Dec-2024 
-9,Adrik,adrik@gmail.com,07-Dec-2024 
-10,Marxo,marxo@g,07-Dec-2024 
-11,Negrito,negirot@gmail.com,07-Dec-2024 
-12,Davida Boti,davidaboti@gmail.com,08-Dec-2024
+user_id,name,email,registration_date,type,medical_record,specialty,colegiate_number,relationship
+1,dsf,dsf,10-Dec-2024,,,,,dfsd
+2,tt,tt,10-Dec-2024,,tt,,,
+3,alvarobello,alvarobello1520@gmail.com,10-Dec-2024,,mal de panxa,,,
+4,familiar,familiar@gmail.com,10-Dec-2024,familiar,,,,germa
+5,pito,pito,10-Dec-2024,pacient,pito,,,
+6,olo,olo,10-Dec-2024,metge,,olo,olo,
+7,alvaroto,alvaroto,10-Dec-2024,pacient,alvoroto,,,
+8,metge,metge@gmail.com,10-Dec-2024,metge,,metge,metge,
+9,familiar1,familiar1@gmail.com,10-Dec-2024,familiar,,,,germana
+10,pacient,pacient@gmail.com,10-Dec-2024,pacient,pacienteee,,,
+11,pacient2,pacient2@gmail.com,10-Dec-2024,pacient,i don't like chocolate bars,,,
+12,metge2,metge2@gmail.com,10-Dec-2024,metge,,metge2,metge,
+13,pacient3,pacient3@gmail.com,10-Dec-2024,pacient,dfds,,,

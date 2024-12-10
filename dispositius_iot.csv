@@ -17,3 +17,7 @@ user_id,name,serial_number,constants,sampling_frequency
 3,tipo,fd,['heart rate'],2
 11,ipad,56,"['Blood Preasure', 'Heart Rate']",12
 12,Temu,12,"['Blood Pressure', 'Heart Rate']",12
+4,HActo,56,['Blood Pressure'],10
+2,hawtoo,45,Blood Pressure,10
+1,hapi,68,"[""Happiness"", ""Heart Rate""]",2
+13,Pxtt,67,"[""Blood Pressure"", ""Heart Rate""]",10

@@ -1,0 +1,10 @@
+network_id,title,creation_date,members_count,members
+1,Family Group,2024-12-01,2,"[{'name': 'Alice Smith', 'dni': '12345678A', 'phones': ['123-456-789', '987-654-321'], 'role': 'Família', 'relationship': 'Germana', 'gender': 'Dona', 'birth_date': '1990-01-01'}, {'name': 'Bob Smith', 'dni': '87654321B', 'phones': ['111-222-333'], 'role': 'Amics', 'gender': 'Home', 'birth_date': '1992-02-02', 'hobbies': ['Football', 'Chess']}]"
+2,Healthcare Support,2024-12-02,1,"[{'name': 'Dr. Jane Doe', 'dni': '45678912C', 'phones': ['555-666-777'], 'role': 'Metge', 'hospital': 'City Hospital', 'colegiate_number': 'MD12345', 'specialty': 'Cardiologia'}]"
+1,Family Group,2024-12-01,3,"[{'name': 'Alice Smith', 'dni': '12345678A', 'phones': ['123-456-789', '987-654-321'], 'role': 'Família', 'relationship': 'Germana', 'gender': 'Dona', 'birth_date': '1990-01-01'}, {'name': 'Bob Smith', 'dni': '87654321B', 'phones': ['111-222-333'], 'role': 'Amics', 'gender': 'Home', 'birth_date': '1992-02-02', 'hobbies': ['Football', 'Chess']}, {'name': 'sdfs', 'dni': 'fsfsf', 'phones': ['sdfsf'], 'role': 'Família', 'details': {'relationship': 'fdsfs', 'gender': 'sfsf', 'birth_date': '2000-01-01'}}]"
+5,colegues,07-Dec-2024 ,0,
+5,colegues,07-Dec-2024 ,1,"[{'name': 'colega', 'dni': '343424', 'phones': ['4234234'], 'role': 'Amics', 'details': {'gender': 'male', 'birth_date': '2000-01-01', 'hobbies': ['vasquet']}}]"
+7,LQSA,07-Dec-2024 ,0,
+7,LQSA,07-Dec-2024 ,1,"[{'name': 'negrito', 'dni': '234234h', 'phones': ['423423423', '23423423'], 'role': 'Amics', 'details': {'gender': 'female', 'birth_date': '2000-02-02', 'hobbies': ['basquet', 'hobbits']}}]"
+9,iese,10-Dec-2024,0,
+9,iese,10-Dec-2024,1,"[{""name"": ""fsdf"", ""dni"": ""fsdf"", ""phones"": [""sfsdf""], ""role"": ""Fam\u00edlia"", ""details"": {""relationship"": ""sfsdf"", ""gender"": ""sfdffsd"", ""birth_date"": ""2000-03-03""}}]"
