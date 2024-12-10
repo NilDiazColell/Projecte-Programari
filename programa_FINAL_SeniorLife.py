@@ -7,9 +7,14 @@ Created on Tue Dec 10 10:43:03 2024
 """
 
 
+
+
+
+
 import csv
 from datetime import datetime
 from colorama import Fore, Style, init
+import json  # Afegir per treballar amb JSON
 
 # Inicialitzar colorama
 init(autoreset=True)
@@ -47,6 +52,34 @@ def is_valid_time(time_str):
 
 # ------------------ Singleton ------------------
 
+class User:
+    def __init__(self, user_id, name, email, registration_date):
+        self.user_id = user_id
+        self.name = name
+        self.email = email
+        self.registration_date = registration_date
+
+
+class Pacient(User):
+    def __init__(self, user_id, name, email, registration_date, medical_record=None):
+        super().__init__(user_id, name, email, registration_date)
+        self.medical_record = medical_record
+
+
+class Metge(User):
+    def __init__(self, user_id, name, email, registration_date, specialty, colegiate_number):
+        super().__init__(user_id, name, email, registration_date)
+        self.specialty = specialty
+        self.colegiate_number = colegiate_number
+
+
+class Familiar(User):
+    def __init__(self, user_id, name, email, registration_date, relationship):
+        super().__init__(user_id, name, email, registration_date)
+        self.relationship = relationship
+
+
+
 class CSVManager:
     _instances = {}
 
@@ -56,15 +89,19 @@ class CSVManager:
             instance.file_path = file_path
             cls._instances[file_path] = instance
         return cls._instances[file_path]
-
+    
     def read(self):
         try:
             with open(self.file_path, mode='r', encoding='utf-8') as file:
                 data = list(csv.DictReader(file))
-                if not data:
-                    print(f"El fitxer {self.file_path} està buit o no conté dades vàlides.")
-                # else:
-                #     print(f"Dades llegides des de {self.file_path}: {data}") #Opcional aquesta línia de codi si es vol veure les dades del CSV
+                for row in data:
+                    # Converteix camps JSON de nou als seus tipus originals
+                    for key, value in row.items():
+                        if value.startswith("{") or value.startswith("["):  # Comprova si és JSON
+                            try:
+                                row[key] = json.loads(value)
+                            except json.JSONDecodeError:
+                                pass
                 return data
         except FileNotFoundError:
             print(f"El fitxer {self.file_path} no existeix.")
@@ -74,36 +111,47 @@ class CSVManager:
             return []
 
 
+    
     def write(self, fieldnames, data):
         try:
             # Llegeix les dades existents
             existing_data = self.read()
     
-            # Actualitza o afegeix les noves dades
+            # Combina les dades existents amb les noves, evitant duplicats
+            combined_data = {}
+            for row in existing_data:
+                # Converteix qualsevol estructura no hashable a JSON
+                row = {k: (json.dumps(v) if isinstance(v, (dict, list)) else v) for k, v in row.items()}
+                combined_data[tuple(row.items())] = row
             for new_row in data:
-                exists = next((row for row in existing_data if row.items() >= new_row.items()), None)
-                if not exists:
-                    existing_data.append(new_row)
+                # Converteix qualsevol estructura no hashable a JSON
+                new_row = {k: (json.dumps(v) if isinstance(v, (dict, list)) else v) for k, v in new_row.items()}
+                combined_data[tuple(new_row.items())] = new_row
     
-            # Escriu les dades combinades al fitxer
+            # Escriu totes les dades al fitxer
             with open(self.file_path, mode='w', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=fieldnames)
                 writer.writeheader()
-                writer.writerows(existing_data)
+                writer.writerows(combined_data.values())
         except Exception as e:
             print(f"Error en escriure a {self.file_path}: {e}")
+
+    
+    
 
 # ------------------ Factory ------------------
 
 class Factory:
     @staticmethod
-    def create_user(user_id, name, email, registration_date):
-        return {
-            "user_id": str(user_id),
-            "name": name,
-            "email": email,
-            "registration_date": registration_date,
-        }
+    def create_user(user_id, name, email, registration_date, user_type="generic", **kwargs):
+        if user_type == "pacient":
+            return Pacient(user_id, name, email, registration_date, kwargs.get("medical_record"))
+        elif user_type == "metge":
+            return Metge(user_id, name, email, registration_date, kwargs.get("specialty"), kwargs.get("colegiate_number"))
+        elif user_type == "familiar":
+            return Familiar(user_id, name, email, registration_date, kwargs.get("relationship"))
+        else:
+            return User(user_id, name, email, registration_date)
 
     @staticmethod
     def create_appointment(appointment_id, user_id, doctor, specialty, date, time, medical_comment):
@@ -219,30 +267,82 @@ class UserController:
         name = self.view.get_input("Introdueix el teu nom: ")
         email = self.view.get_input("Introdueix el teu correu electrònic: ")
         registration_date = format_date(datetime.now())
-        if any(u['email'] == email for u in users):
-            self.view.display_message("Aquest correu ja està registrat. Intenta amb un altre.")
-            return
-        user = Factory.create_user(user_id, name, email, registration_date)
-        users.append(user)
-        self.users_manager.write(["user_id", "name", "email", "registration_date"], users)
-        self.view.display_message(f"Usuari registrat amb èxit: {user}")
+
+        user_type = validate_input(
+            "Selecciona el tipus d'usuari: 1. Pacient, 2. Metge, 3. Familiar: ",
+            lambda x: x in ["1", "2", "3"],
+            "Tipus no vàlid. Si us plau, intenta-ho de nou."
+        )
+
+        if user_type == "1":  # Pacient
+            medical_record = self.view.get_input("Introdueix l'historial mèdic (opcional): ")
+            user = Factory.create_user(user_id, name, email, registration_date, "pacient", medical_record=medical_record)
+        elif user_type == "2":  # Metge
+            specialty = self.view.get_input("Introdueix l'especialitat mèdica: ")
+            colegiate_number = self.view.get_input("Introdueix el número de col·legiat: ")
+            user = Factory.create_user(user_id, name, email, registration_date, "metge", specialty=specialty, colegiate_number=colegiate_number)
+        elif user_type == "3":  # Familiar
+            relationship = self.view.get_input("Introdueix el grau de parentiu (ex: germà/na, pare/mare, etc.): ")
+            user = Factory.create_user(user_id, name, email, registration_date, "familiar", relationship=relationship)
+            
+            # Assegurar que només s'afegeixin camps necessaris
+        user_dict = {k: v for k, v in user.__dict__.items() if v is not None and k != "parameters"}
+        user_dict["type"] = user_type  # Afegir el tipus d'usuari explícitament
+
+        users.append(user.__dict__)  # Convertim l'objecte en diccionari per guardar-lo al CSV
+        self.users_manager.write(["user_id", "name", "email", "registration_date", "type"], users)
+        self.view.display_message(f"Usuari registrat amb èxit: {user.__dict__}")
+
+
 
     def confirm_user_id(self):
         users = self.users_manager.read()
         while True:
-            user_id = self.view.get_input("Introdueix el teu ID d'usuari: ")
-            user = next((u for u in users if u["user_id"] == user_id), None)
-            if user:
-                confirm = self.view.get_input(f"T'estàs referint a {user['name']}? (sí/no): ").strip().lower()
+            user_id = self.view.get_input("Introdueix el ID d'usuari: ")
+            user_data = next((u for u in users if u["user_id"] == user_id), None)
+            if user_data:
+                user_type = user_data.get("type", "generic")
+    
+                # Filtrar camps específics segons el tipus d'usuari
+                if user_type == "pacient":
+                    user = Pacient(
+                        user_id=user_data["user_id"],
+                        name=user_data["name"],
+                        email=user_data["email"],
+                        registration_date=user_data["registration_date"],
+                        medical_record=user_data.get("medical_record")
+                    )
+                elif user_type == "metge":
+                    user = Metge(
+                        user_id=user_data["user_id"],
+                        name=user_data["name"],
+                        email=user_data["email"],
+                        registration_date=user_data["registration_date"],
+                        specialty=user_data.get("specialty"),
+                        colegiate_number=user_data.get("colegiate_number")
+                    )
+                elif user_type == "familiar":
+                    user = Familiar(
+                        user_id=user_data["user_id"],
+                        name=user_data["name"],
+                        email=user_data["email"],
+                        registration_date=user_data["registration_date"],
+                        relationship=user_data.get("relationship")
+                    )
+                else:
+                    user = User(
+                        user_id=user_data["user_id"],
+                        name=user_data["name"],
+                        email=user_data["email"],
+                        registration_date=user_data["registration_date"]
+                    )
+    
+                confirm = self.view.get_input(f"T'estàs referint a {user.name}? (sí/no): ").strip().lower()
                 if confirm == "sí":
                     return user_id
-                elif confirm == "no":
-                    self.view.display_message("Torna a introduir el teu ID d'usuari.")
-                else:
-                    self.view.display_message("Si us plau, respon amb 'sí' o 'no'.")
-            else:
-                self.view.display_message("ID d'usuari no vàlid. Si us plau, intenta-ho de nou.")
-
+            self.view.display_message("ID d'usuari no vàlid. Si us plau, intenta-ho de nou.")
+    
+        
 
 
 class SocialNetworkController:
@@ -370,11 +470,16 @@ class SocialNetworkController:
 
         network["members"].append(member)
         self.update_network_members(network)
+        
+        
 
     def update_network_members(self, network):
         network["members_count"] = len(network["members"])
         self.social_network_manager.write(["network_id", "title", "creation_date", "members_count", "members"], [network])
         self.view.display_message(f"Nou membre afegit a la xarxa amb ID {network['network_id']}.")
+    
+    
+    
 
     def display_members_count(self):
         """
@@ -433,8 +538,6 @@ class AppointmentController:
         self.appointments_manager.write(["appointment_id", "user_id", "doctor", "specialty", "date", "time", "medical_comment"], appointments)
         
         self.view.display_message(f"Cita programada amb èxit: {appointment}")
-        
-    
 
 
 class NotificationController:
@@ -666,7 +769,8 @@ class IoTDeviceController:
             alerts_data
         )
         self.view.display_message(f"Alerta generada per la constant {constant} (Valor: {value}).")
-
+    
+    
 def main_menu():
     # Models
     users_manager = CSVManager(r"C:\Users\abell\Downloads\usuaris.csv")
@@ -694,12 +798,11 @@ def main_menu():
     )
 
     print(Fore.BLUE + Style.BRIGHT + "\n\nBenvingut a SeniorLife! El teu gestor mèdic de confiança.\n")
-    user_logged_in = False
     current_user = None
 
-    while not user_logged_in:
-        print(Fore.YELLOW + Style.BRIGHT + "\n--- INICI DE SESSIÓ ---")
-        print("1. Iniciar sessió")
+    while not current_user:
+        print(Fore.YELLOW + Style.BRIGHT + "\n--- MENÚ PRINCIPAL ---")
+        print("1. Iniciar Sessió")
         print("2. Registrar-se")
         print("3. Sortir")
         choice = view.get_input("Selecciona una opció: ")
@@ -709,71 +812,115 @@ def main_menu():
             users = users_manager.read()
             current_user = next((u for u in users if u["email"] == email), None)
             if current_user:
-                view.display_message(f"Benvingut/a de nou, {current_user['name']}!")
-                user_logged_in = True
+                user_type = current_user["type"]  # Assigna el tipus d'usuari des del fitxer
+                view.display_message(f"\nBenvingut/a de nou, {current_user['name']}!")
             else:
                 view.display_message("Aquest correu no està registrat. Si us plau, registra't primer.")
         elif choice == "2":
-            email = view.get_input("Introdueix el teu correu electrònic per registrar-te: ")
-            users = users_manager.read()
-            if any(u["email"] == email for u in users):
-                view.display_message("Aquest correu ja està registrat. Si us plau, inicia sessió.")
+            print(Fore.YELLOW + Style.BRIGHT + "\n--- REGISTRE D'USUARI ---")
+            print("1. Registrar-se com a Pacient")
+            print("2. Registrar-se com a Metge")
+            print("3. Registrar-se com a Familiar")
+            user_type_choice = view.get_input("Selecciona el tipus d'usuari: ")
+
+            if user_type_choice in ["1", "2", "3"]:
+                user_type = "pacient" if user_type_choice == "1" else "metge" if user_type_choice == "2" else "familiar"
+                users = users_manager.read()
+                email = view.get_input("Introdueix el teu correu electrònic per registrar-te: ")
+                if any(u["email"] == email for u in users):
+                    view.display_message("Aquest correu ja està registrat. Si us plau, inicia sessió.")
+                else:
+                    name = view.get_input("Introdueix el teu nom: ")
+                    registration_date = format_date(datetime.now())
+                    user_id = len(users) + 1
+
+                    if user_type == "pacient":
+                        medical_record = view.get_input("Introdueix l'historial mèdic (opcional): ")
+                        new_user = Factory.create_user(user_id, name, email, registration_date, user_type, medical_record=medical_record)
+                    elif user_type == "metge":
+                        specialty = view.get_input("Introdueix l'especialitat mèdica: ")
+                        colegiate_number = view.get_input("Introdueix el número de col·legiat: ")
+                        new_user = Factory.create_user(user_id, name, email, registration_date, user_type, specialty=specialty, colegiate_number=colegiate_number)
+                    elif user_type == "familiar":
+                        relationship = view.get_input("Introdueix el grau de parentiu (ex: germà/na, pare/mare, etc.): ")
+                        new_user = Factory.create_user(user_id, name, email, registration_date, user_type, relationship=relationship)
+
+                    # Assegurar que el camp `type` es guarda correctament al CSV
+                    user_dict = new_user.__dict__
+                    user_dict["type"] = user_type  # Afegir explícitament el tipus d'usuari
+
+                    users.append(user_dict)
+                    users_manager.write(
+                        ["user_id", "name", "email", "registration_date", "type", "medical_record", "specialty", "colegiate_number", "relationship"],
+                        users
+                    )
+                    view.display_message(f"Usuari registrat amb èxit. Benvingut/da, {name}!")
+                    # Un cop registrat, es reinicia el menú principal
             else:
-                name = view.get_input("Introdueix el teu nom: ")
-                registration_date = format_date(datetime.now())
-                user_id = len(users) + 1
-                new_user = Factory.create_user(user_id, name, email, registration_date)
-                users.append(new_user)
-                users_manager.write(["user_id", "name", "email", "registration_date"], users)
-                view.display_message(f"Usuari registrat amb èxit. Benvingut/da, {name}!")
-                current_user = new_user
-                user_logged_in = True
+                view.display_message("Tipus d'usuari no vàlid. Si us plau, intenta-ho de nou.")
         elif choice == "3":
             view.display_message("\nSortint del sistema... Gràcies per confiar en SeniorLife!")
             return
         else:
             view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
 
-    # Un cop l'usuari ha iniciat sessió o s'ha registrat
-    while True:
+    # Un cop l'usuari ha iniciat sessió, accedeix a les funcionalitats
+    running = True
+    while running:
         print(Fore.YELLOW + Style.BRIGHT + "\n--- MENÚ PRINCIPAL ---")
-        print("1. Programar cita")
-        print("2. Crear perfil mèdic")
-        print("3. Enviar notificació")
-        print("4. Veure paràmetres de salut")
-        print("5. Gestionar xarxa social")
-        print("6. Afegir dispositiu IoT")
-        print("7. Sortir")
+        if current_user["type"] == "pacient":
+            print("1. Programar cita")
+            print("2. Crear perfil mèdic")
+            print("3. Veure paràmetres de salut")
+            print("4. Gestionar xarxa social")
+        elif current_user["type"] == "metge":
+            print("1. Enviar notificació")
+            print("2. Afegir dispositiu IoT")
+            print("3. Configurar llindars")
+            print("4. Registrar mesura")
+            print("5. Veure paràmetres de salut")
+        elif current_user["type"] == "familiar":
+            print("1. Gestionar xarxa social")
+        print("9. Sortir")
         choice = view.get_input("Selecciona una opció: ")
 
-        if choice == "1":
-            appointment_controller.schedule_appointment()
-        elif choice == "2":
-            medical_controller.create_medical_profile()
-        elif choice == "3":
-            notification_controller.send_notification()
-        elif choice == "4":
-            parameter_controller.view_parameters()
-        elif choice == "5":
-            social_network_controller.manage_social_network()
-        elif choice == "6":
-            iot_action = validate_input(
-                "1: Afegir dispositiu IoT, 2: Configurar llindars, 3: Registrar mesura: ",
-                lambda x: x in ["1", "2", "3"],
-                "Opció no vàlida."
-            )
-            if iot_action == "1":
-                iot_controller.add_iot_device()
-            elif iot_action == "2":
-                iot_controller.configure_thresholds()
-            elif iot_action == "3":
-                iot_controller.record_measurement()
-        elif choice == "7":
+        if choice == "9":  # Afegit per sortir del bucle principal
             view.display_message("\nSortint del sistema... Gràcies per confiar en SeniorLife!")
-            break
-        else:
-            view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
-
+            running = False
+        elif current_user["type"] == "pacient":
+            if choice == "1":
+                appointment_controller.schedule_appointment()
+            elif choice == "2":
+                medical_controller.create_medical_profile()
+            elif choice == "3":
+                parameter_controller.view_parameters()
+            elif choice == "4":
+                social_network_controller.manage_social_network()
+            else:
+                view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
+        elif current_user["type"] == "metge":
+            if choice == "1":
+                notification_controller.send_notification()
+            elif choice == "2":
+                iot_controller.add_iot_device()
+            elif choice == "3":
+                iot_controller.configure_thresholds()
+            elif choice == "4":
+                iot_controller.record_measurement()
+            elif choice == "5":
+                parameter_controller.view_parameters()
+            else:
+                view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
+        elif current_user["type"] == "familiar":
+            if choice == "1":
+                social_network_controller.manage_social_network()
+            else:
+                view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
 
 if __name__ == "__main__":
     main_menu()
+
+
+
+
+
