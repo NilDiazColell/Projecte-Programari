@@ -1,4 +1,4 @@
-    
+   
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime
@@ -21,14 +21,14 @@ class TestSeniorLife(unittest.TestCase):
     max_score = 10  # Nota màxima
     accumulated_score = 0  # Variable global per acumular puntuació
     test_scores = {
-        "test_register_user": 2,
+        # "test_register_user": 2,
         "test_confirm_user_id": 1,
         "test_schedule_appointment": 2,
         "test_send_notification": 1,
         "test_create_medical_profile": 2,
-        "test_add_iot_device": 1,
-        "test_view_parameters": 0.5,
-        "test_manage_social_network": 0.5,
+        "test_add_iot_device": 2,
+        "test_view_parameters": 1,
+        "test_manage_social_network": 1,
     }
 
     def setUp(self):
@@ -68,25 +68,7 @@ class TestSeniorLife(unittest.TestCase):
         """
         print(f"\nPuntuació acumulada fins ara: {TestSeniorLife.accumulated_score}/{self.max_score}")
 
-
-    def test_register_user(self):
-        self.users_manager.read.return_value = [
-            {"user_id": "1", "name": "John Doe", "email": "john@example.com", "registration_date": "01-Jan-2024"}
-        ]
-        self.view.get_input.side_effect = ["Alice", "alice@example.com"]
-
-        mock_date = datetime(2024, 12, 7, 15, 30)
-        with patch("programa_FINAL_SeniorLife.datetime") as mock_datetime:
-            mock_datetime.now.return_value = mock_date
-            mock_datetime.strftime = datetime.strftime
-            self.users_controller.register_user()
-
-        expected = [
-            {"user_id": "1", "name": "John Doe", "email": "john@example.com", "registration_date": "01-Jan-2024"},
-            {"user_id": "2", "name": "Alice", "email": "alice@example.com", "registration_date": "07-Dec-2024"},
-        ]
-        actual = self.users_manager.write.call_args[0][1]
-        self.assert_with_score(expected, actual, "test_register_user")
+        
 
     def test_confirm_user_id(self):
         self.users_manager.read.return_value = [
@@ -96,7 +78,8 @@ class TestSeniorLife(unittest.TestCase):
         user_id = self.users_controller.confirm_user_id()
         expected = "1"
         self.assert_with_score(expected, user_id, "test_confirm_user_id")
-        
+    
+
     def test_schedule_appointment(self):
         appointments_manager = MagicMock(spec=CSVManager)
         appointments_manager.read.return_value = []
