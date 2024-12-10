@@ -1,10 +1,10 @@
+
 # -*- coding: utf-8 -*-
 """
-Created on Sat Dec  7 20:15:20 2024
+Created on Tue Dec 10 10:43:03 2024
 
 @author: abell
 """
-
 
 
 import csv
@@ -18,11 +18,7 @@ init(autoreset=True)
 
 def format_date(date):
     """Format de data requerit: DD-MMM-YYYY amb zona horària"""
-    return date.strftime("%d-%b-%Y %Z")
-
-# def format_date(date):
-#     """Formatear la fecha en DD-MMM-YYYY."""
-#     return date.strftime("%d-%b-%Y").strip()
+    return date.strftime("%d-%b-%Y").strip()  # Eliminem espais
 
 
 def validate_input(prompt, validation_fn, error_message):
@@ -67,8 +63,8 @@ class CSVManager:
                 data = list(csv.DictReader(file))
                 if not data:
                     print(f"El fitxer {self.file_path} està buit o no conté dades vàlides.")
-                else:
-                    print(f"Dades llegides des de {self.file_path}: {data}")
+                # else:
+                #     print(f"Dades llegides des de {self.file_path}: {data}") #Opcional aquesta línia de codi si es vol veure les dades del CSV
                 return data
         except FileNotFoundError:
             print(f"El fitxer {self.file_path} no existeix.")
@@ -246,28 +242,7 @@ class UserController:
                     self.view.display_message("Si us plau, respon amb 'sí' o 'no'.")
             else:
                 self.view.display_message("ID d'usuari no vàlid. Si us plau, intenta-ho de nou.")
-    
-    # def confirm_user_id(self):
-    #     users = self.users_manager.read()
-    #     if not users:
-    #         self.view.display_message("No hi ha usuaris registrats.")
-    #         return None
-    
-    #     while True:
-    #         user_id = self.view.get_input("Introdueix el teu ID d'usuari: ").strip()
-    #         user = next((u for u in users if u["user_id"] == str(user_id)), None)
-    #         if user:
-    #             confirm = self.view.get_input(f"T'estàs referint a {user['name']}? (sí/no): ").strip().lower()
-    #             if confirm == "sí":
-    #                 return user_id
-    #             elif confirm == "no":
-    #                 self.view.display_message("Torna a introduir el teu ID d'usuari.")
-    #             else:
-    #                 self.view.display_message("Si us plau, respon amb 'sí' o 'no'.")
-    #         else:
-    #             self.view.display_message("ID d'usuari no vàlid. Si us plau, intenta-ho de nou.")
 
-    
 
 
 class SocialNetworkController:
@@ -442,16 +417,24 @@ class AppointmentController:
         user_id = self.users_controller.confirm_user_id()
         appointments = self.appointments_manager.read()
         appointment_id = len(appointments) + 1
+        
         doctor = self.view.get_input("Introdueix el nom del doctor: ")
         specialty = self.view.get_input("Introdueix l'especialitat mèdica: ")
         date = validate_input("Introdueix la data (YYYY-MM-DD): ", is_valid_date, "Data no vàlida.")
         time = validate_input("Introdueix l'hora (HH:MM): ", is_valid_time, "Hora no vàlida.")
         medical_comment = self.view.get_input("Descriu la teva situació mèdica actual (15-20 paraules): ")
-        appointment = Factory.create_appointment(appointment_id, user_id, doctor, specialty, date, time, medical_comment)
-        appointments.append(appointment)
-        self.appointments_manager.write(["appointment_id", "user_id", "doctor", "specialty", "date", "time", "medical_comment"], appointments)
-        self.view.display_message(f"Cita programada amb èxit: {appointment}")
+        
 
+
+        appointment = Factory.create_appointment(appointment_id, user_id, doctor, specialty, date, time, medical_comment)
+        
+        appointments.append(appointment)
+        
+        self.appointments_manager.write(["appointment_id", "user_id", "doctor", "specialty", "date", "time", "medical_comment"], appointments)
+        
+        self.view.display_message(f"Cita programada amb èxit: {appointment}")
+        
+    
 
 
 class NotificationController:
@@ -483,14 +466,16 @@ class ParameterController:
         user_id = self.users_controller.confirm_user_id()
         parameters = self.parameters_manager.read()
     
-        # Filtrar parámetros para el usuario especificado
+        # Filtrem paràmetres per l'usuari en específic
         user_parameters = [p for p in parameters if p["user_id"] == user_id]
     
         if user_parameters:
             for param in user_parameters:
-                # Usar las claves correctas del archivo CSV
+                # Utilitzar les claus correctes
                 constant = param.get("constant", "Desconeguda")
                 value = param.get("value", "No disponible")
+                
+                self.view.display_message(f"\n--- PARÀMETRES DE SALUT DE L'USUARI {user_id} ---")
                 self.view.display_message(f"{constant}: {value}")
         else:
             self.view.display_message("No s'han trobat paràmetres per aquest usuari.")
@@ -539,7 +524,7 @@ class IoTDeviceController:
     def __init__(self, iot_manager, constants_manager, thresholds_manager, alerts_manager, users_controller, view):
         self.iot_manager = iot_manager
         self.constants_manager = constants_manager
-        self.thresholds_manager = thresholds_manager  # Nuevo gestor para thresholds.csv
+        self.thresholds_manager = thresholds_manager  
         self.alerts_manager = alerts_manager
         self.users_controller = users_controller
         self.view = view
@@ -682,54 +667,6 @@ class IoTDeviceController:
         )
         self.view.display_message(f"Alerta generada per la constant {constant} (Valor: {value}).")
 
-
-
-# class AlertController:
-#     def __init__(self, alert_manager, users_controller, view):
-#         self.alert_manager = alert_manager
-#         self.users_controller = users_controller
-#         self.view = view
-
-#     def trigger_alert(self):
-#         self.view.display_message("\n--- GENERAR ALERTA ---")
-#         user_id = self.users_controller.confirm_user_id()
-#         alerts = self.alert_manager.read()
-
-#         alert_type = validate_input(
-#             "Tipus d'alerta (1: Urgència, 2: Personal Mèdic, 3: Cuidador): ",
-#             lambda x: x in ["1", "2", "3"],
-#             "Opció no vàlida.",
-#         )
-
-#         risk_level = validate_input(
-#             "Nivell de risc (1: Alt, 2: Mitjà, 3: Baix): ",
-#             lambda x: x in ["1", "2", "3"],
-#             "Opció no vàlida.",
-#         )
-
-#         contact_number = self.view.get_input("Introdueix el número de telèfon de contacte: ")
-
-#         additional_info = {}
-#         if alert_type == "1":  # Urgència
-#             additional_info["ambulance_required"] = (
-#                 self.view.get_input("Es necessita ambulància? (sí/no): ").strip().lower() == "sí"
-#             )
-#             additional_info["clinical_history_code"] = self.view.get_input(
-#                 "Introdueix el codi de la història clínica: "
-#             )
-#         elif alert_type == "2":  # Personal Mèdic
-#             additional_info["access_key"] = "TEMP_KEY_24H"  # Exemple de clau temporal
-#             additional_info["message"] = self.view.get_input("Introdueix un missatge descriptiu de l'alerta: ")
-#         elif alert_type == "3":  # Cuidador
-#             additional_info["instructions"] = self.view.get_input("Introdueix les instruccions per al cuidador: ")
-
-#         new_alert = Factory.create_alert(alert_type, risk_level, contact_number, additional_info)
-#         alerts.append(new_alert)
-#         self.alert_manager.write(["alert_type", "risk_level", "contact_number", "additional_info"], alerts)
-#         self.view.display_message("Alerta generada amb èxit.")
-
-# ------------------ Main Menu ------------------
-
 def main_menu():
     # Models
     users_manager = CSVManager(r"C:\Users\abell\Downloads\usuaris.csv")
@@ -739,7 +676,7 @@ def main_menu():
     social_network_manager = CSVManager(r"C:\Users\abell\Downloads\xarxes_socials.csv")
     parameters_manager = CSVManager(r"C:\Users\abell\Downloads\constants.csv")
     iot_manager = CSVManager(r"C:\Users\abell\Downloads\dispositius_iot.csv")
-    thresholds_manager = CSVManager(r"C:\Users\abell\Downloads\thresholds.csv")  # Nuevo gestor de thresholds.csv
+    thresholds_manager = CSVManager(r"C:\Users\abell\Downloads\thresholds.csv")  
     alert_manager = CSVManager(r"C:\Users\abell\Downloads\alertes.csv")
 
     # Views
@@ -754,35 +691,72 @@ def main_menu():
     social_network_controller = SocialNetworkController(social_network_manager, users_controller, view)
     iot_controller = IoTDeviceController(
         iot_manager, parameters_manager, thresholds_manager, alert_manager, users_controller, view
-    )  # Se añade thresholds_manager
-    # alert_controller = AlertController(alert_manager, users_controller, view)
+    )
 
     print(Fore.BLUE + Style.BRIGHT + "\n\nBenvingut a SeniorLife! El teu gestor mèdic de confiança.\n")
-    while True:
-        print(Fore.YELLOW + Style.BRIGHT + "\n--- MENÚ PRINCIPAL ---")
-        print("1. Registrar usuari")
-        print("2. Programar cita")
-        print("3. Crear perfil mèdic")
-        print("4. Enviar notificació")
-        print("5. Veure paràmetres de salut")
-        print("6. Gestionar xarxa social")
-        print("7. Afegir dispositiu IoT")
-        print("8. Sortir")
+    user_logged_in = False
+    current_user = None
+
+    while not user_logged_in:
+        print(Fore.YELLOW + Style.BRIGHT + "\n--- INICI DE SESSIÓ ---")
+        print("1. Iniciar sessió")
+        print("2. Registrar-se")
+        print("3. Sortir")
         choice = view.get_input("Selecciona una opció: ")
 
         if choice == "1":
-            users_controller.register_user()
+            email = view.get_input("Introdueix el teu correu electrònic: ")
+            users = users_manager.read()
+            current_user = next((u for u in users if u["email"] == email), None)
+            if current_user:
+                view.display_message(f"Benvingut/a de nou, {current_user['name']}!")
+                user_logged_in = True
+            else:
+                view.display_message("Aquest correu no està registrat. Si us plau, registra't primer.")
         elif choice == "2":
-            appointment_controller.schedule_appointment()
+            email = view.get_input("Introdueix el teu correu electrònic per registrar-te: ")
+            users = users_manager.read()
+            if any(u["email"] == email for u in users):
+                view.display_message("Aquest correu ja està registrat. Si us plau, inicia sessió.")
+            else:
+                name = view.get_input("Introdueix el teu nom: ")
+                registration_date = format_date(datetime.now())
+                user_id = len(users) + 1
+                new_user = Factory.create_user(user_id, name, email, registration_date)
+                users.append(new_user)
+                users_manager.write(["user_id", "name", "email", "registration_date"], users)
+                view.display_message(f"Usuari registrat amb èxit. Benvingut/da, {name}!")
+                current_user = new_user
+                user_logged_in = True
         elif choice == "3":
+            view.display_message("\nSortint del sistema... Gràcies per confiar en SeniorLife!")
+            return
+        else:
+            view.display_message("Opció no vàlida. Si us plau, intenta-ho de nou.")
+
+    # Un cop l'usuari ha iniciat sessió o s'ha registrat
+    while True:
+        print(Fore.YELLOW + Style.BRIGHT + "\n--- MENÚ PRINCIPAL ---")
+        print("1. Programar cita")
+        print("2. Crear perfil mèdic")
+        print("3. Enviar notificació")
+        print("4. Veure paràmetres de salut")
+        print("5. Gestionar xarxa social")
+        print("6. Afegir dispositiu IoT")
+        print("7. Sortir")
+        choice = view.get_input("Selecciona una opció: ")
+
+        if choice == "1":
+            appointment_controller.schedule_appointment()
+        elif choice == "2":
             medical_controller.create_medical_profile()
-        elif choice == "4":
+        elif choice == "3":
             notification_controller.send_notification()
-        elif choice == "5":
+        elif choice == "4":
             parameter_controller.view_parameters()
-        elif choice == "6":
+        elif choice == "5":
             social_network_controller.manage_social_network()
-        elif choice == "7":
+        elif choice == "6":
             iot_action = validate_input(
                 "1: Afegir dispositiu IoT, 2: Configurar llindars, 3: Registrar mesura: ",
                 lambda x: x in ["1", "2", "3"],
@@ -794,7 +768,7 @@ def main_menu():
                 iot_controller.configure_thresholds()
             elif iot_action == "3":
                 iot_controller.record_measurement()
-        elif choice == "8":
+        elif choice == "7":
             view.display_message("\nSortint del sistema... Gràcies per confiar en SeniorLife!")
             break
         else:
@@ -803,5 +777,3 @@ def main_menu():
 
 if __name__ == "__main__":
     main_menu()
-
-
