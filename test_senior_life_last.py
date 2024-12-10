@@ -21,7 +21,6 @@ class TestSeniorLife(unittest.TestCase):
     max_score = 10  # Nota màxima
     accumulated_score = 0  # Variable global per acumular puntuació
     test_scores = {
-        # "test_register_user": 2,
         "test_confirm_user_id": 1,
         "test_schedule_appointment": 2,
         "test_send_notification": 1,
